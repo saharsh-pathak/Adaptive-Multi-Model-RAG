@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MMRAG</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace; background: #fff; color: #000; line-height: 1.6; padding: 2rem; }
+  .container { max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 1.5rem; font-weight: 400; letter-spacing: -0.02em; margin-bottom: 2rem; }
+  h2 { font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem; }
+  hr { border: none; border-top: 1px solid #000; margin: 2rem 0; }
+  .section { margin-bottom: 2rem; }
+  input, textarea, button { font: inherit; font-size: 0.9rem; border: 1px solid #000; background: #fff; color: #000; border-radius: 0; width: 100%; }
+  input, textarea { padding: 0.6rem; }
+  textarea { resize: vertical; min-height: 3rem; }
+  button { padding: 0.6rem 1.2rem; cursor: pointer; width: auto; }
+  button:hover { background: #000; color: #fff; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-block { width: 100%; }
+  .file-label { display: block; margin-bottom: 0.5rem; font-size: 0.85rem; }
+  input[type="file"] { border: none; padding: 0; }
+  .row { display: flex; gap: 0.5rem; }
+  .row > *:first-child { flex: 1; }
+  .msg { padding: 0.75rem; border: 1px solid #000; margin-top: 0.75rem; font-size: 0.85rem; }
+  .msg.error { border-color: #000; background: #f5f5f5; }
+  .msg.success { border-color: #000; }
+  .answer { white-space: pre-wrap; font-size: 0.9rem; line-height: 1.7; margin-top: 0; }
+  .meta { display: flex; flex-wrap: wrap; gap: 1rem; font-size: 0.8rem; color: #555; margin-top: 0.75rem; }
+  .meta span { border-bottom: 1px solid #ccc; }
+  .sources { margin-top: 0.75rem; font-size: 0.85rem; }
+  .sources strong { font-weight: 600; }
+  .sources ul { list-style: none; display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.3rem; }
+  .sources li { border: 1px solid #000; padding: 0.15rem 0.5rem; font-size: 0.8rem; }
+  .hidden { display: none; }
+  .spinner { display: inline-block; width: 0.8rem; height: 0.8rem; border: 1.5px solid #000; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; margin-left: 0.4rem; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #upload-status { margin-top: 0.75rem; }
+  #chat-status { margin-top: 0.75rem; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Adaptive Multi-Model RAG Assistant</h1>
+
+  <div class="section">
+    <h2>Upload PDF</h2>
+    <div class="row">
+      <input type="file" id="pdf-file" accept=".pdf">
+      <button id="upload-btn">Upload</button>
+    </div>
+    <div id="upload-status" class="hidden"></div>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <h2>Chat</h2>
+    <div class="row">
+      <textarea id="question-input" rows="1" placeholder="Ask a question about your documents..."></textarea>
+      <button id="chat-btn">Ask</button>
+    </div>
+    <div id="chat-status" class="hidden"></div>
+    <div id="chat-result" class="hidden">
+      <div class="answer" id="answer-text"></div>
+      <div class="sources" id="sources-area" class="hidden"></div>
+      <div class="meta" id="meta-area"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const uploadBtn = document.getElementById('upload-btn');
+const fileInput = document.getElementById('pdf-file');
+const uploadStatus = document.getElementById('upload-status');
+const questionInput = document.getElementById('question-input');
+const chatBtn = document.getElementById('chat-btn');
+const chatStatus = document.getElementById('chat-status');
+const chatResult = document.getElementById('chat-result');
+const answerText = document.getElementById('answer-text');
+const sourcesArea = document.getElementById('sources-area');
+const metaArea = document.getElementById('meta-area');
+
+uploadBtn.addEventListener('click', async () => {
+  const file = fileInput.files[0];
+  if (!file) return;
+  uploadBtn.disabled = true;
+  uploadStatus.className = 'msg';
+  uploadStatus.innerHTML = 'Uploading<span class="spinner"></span>';
+  uploadStatus.classList.remove('hidden');
+  const form = new FormData();
+  form.append('file', file);
+  try {
+    const res = await fetch('/upload', { method: 'POST', body: form });
+    const data = await res.json();
+    uploadStatus.className = 'msg success';
+    uploadStatus.textContent = `${data.chunks_indexed} chunks indexed`;
+  } catch {
+    uploadStatus.className = 'msg error';
+    uploadStatus.textContent = 'Upload failed';
+  } finally {
+    uploadBtn.disabled = false;
+  }
+});
+
+chatBtn.addEventListener('click', async () => {
+  const question = questionInput.value.trim();
+  if (!question) return;
+  chatBtn.disabled = true;
+  chatResult.classList.add('hidden');
+  chatStatus.className = 'msg';
+  chatStatus.innerHTML = 'Thinking<span class="spinner"></span>';
+  chatStatus.classList.remove('hidden');
+  try {
+    const res = await fetch('/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question })
+    });
+    const data = await res.json();
+    answerText.textContent = data.answer;
+    if (data.sources && data.sources.length) {
+      sourcesArea.classList.remove('hidden');
+      sourcesArea.innerHTML = '<strong>Sources</strong><ul>' +
+        data.sources.map(s => `<li>p. ${s.page}</li>`).join('') + '</ul>';
+    } else {
+      sourcesArea.classList.add('hidden');
+    }
+    metaArea.innerHTML =
+      `<span>model: ${data.model}</span>` +
+      `<span>retrieval: ${data.metrics.retrieval_ms}ms</span>` +
+      `<span>generation: ${data.metrics.generation_ms}ms</span>`;
+    chatResult.classList.remove('hidden');
+    chatStatus.classList.add('hidden');
+  } catch {
+    chatStatus.className = 'msg error';
+    chatStatus.textContent = 'Request failed';
+  } finally {
+    chatBtn.disabled = false;
+  }
+});
+
+questionInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); chatBtn.click(); }
+});
+</script>
+</body>
+</html>
