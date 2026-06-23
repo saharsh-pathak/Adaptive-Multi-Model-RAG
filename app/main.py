@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.routers.chat_router import router as chat_router
 from app.routers.upload_router import router as upload_router
+from app.routers.vault_router import router as vault_router
 from app.utils.constants import BASE_DIR, CHROMA_DB_DIR, LOG_DIR, UPLOAD_DIR
 
 app = FastAPI(title="Adaptive Multi-Model RAG Assistant")
@@ -24,6 +25,7 @@ app.add_middleware(
 
 app.include_router(upload_router)
 app.include_router(chat_router)
+app.include_router(vault_router)
 
 
 @app.get("/")
