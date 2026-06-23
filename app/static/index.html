@@ -3,147 +3,748 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MMRAG</title>
+<title>Adaptive Multi-Model RAG Assistant</title>
+<!-- Google Fonts: JetBrains Mono -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace; background: #fff; color: #000; line-height: 1.6; padding: 2rem; }
-  .container { max-width: 720px; margin: 0 auto; }
-  h1 { font-size: 1.5rem; font-weight: 400; letter-spacing: -0.02em; margin-bottom: 2rem; }
-  h2 { font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem; }
-  hr { border: none; border-top: 1px solid #000; margin: 2rem 0; }
-  .section { margin-bottom: 2rem; }
-  input, textarea, button { font: inherit; font-size: 0.9rem; border: 1px solid #000; background: #fff; color: #000; border-radius: 0; width: 100%; }
-  input, textarea { padding: 0.6rem; }
-  textarea { resize: vertical; min-height: 3rem; }
-  button { padding: 0.6rem 1.2rem; cursor: pointer; width: auto; }
-  button:hover { background: #000; color: #fff; }
-  button:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn-block { width: 100%; }
-  .file-label { display: block; margin-bottom: 0.5rem; font-size: 0.85rem; }
-  input[type="file"] { border: none; padding: 0; }
-  .row { display: flex; gap: 0.5rem; }
-  .row > *:first-child { flex: 1; }
-  .msg { padding: 0.75rem; border: 1px solid #000; margin-top: 0.75rem; font-size: 0.85rem; }
-  .msg.error { border-color: #000; background: #f5f5f5; }
-  .msg.success { border-color: #000; }
-  .answer { white-space: pre-wrap; font-size: 0.9rem; line-height: 1.7; margin-top: 0; }
-  .meta { display: flex; flex-wrap: wrap; gap: 1rem; font-size: 0.8rem; color: #555; margin-top: 0.75rem; }
-  .meta span { border-bottom: 1px solid #ccc; }
-  .sources { margin-top: 0.75rem; font-size: 0.85rem; }
-  .sources strong { font-weight: 600; }
-  .sources ul { list-style: none; display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.3rem; }
-  .sources li { border: 1px solid #000; padding: 0.15rem 0.5rem; font-size: 0.8rem; }
-  .hidden { display: none; }
-  .spinner { display: inline-block; width: 0.8rem; height: 0.8rem; border: 1.5px solid #000; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; margin-left: 0.4rem; vertical-align: middle; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  #upload-status { margin-top: 0.75rem; }
-  #chat-status { margin-top: 0.75rem; }
+  :root {
+    --bg-color: #121212;
+    --card-bg: #1a1a1a;
+    --border-color: #d7af72;
+    --border-color-dim: rgba(215, 175, 114, 0.25);
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --gold: #d7af72;
+    --gold-glow: rgba(215, 175, 114, 0.15);
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 2.5rem 1.5rem;
+  }
+
+  .container {
+    max-width: 98%;
+    width: 98%;
+    margin: 0 auto;
+  }
+
+  /* Header Styling */
+  header {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+  }
+
+  header p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    font-weight: 300;
+  }
+
+  /* Dashboard Column Layout */
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  @media (min-width: 900px) {
+    .dashboard-grid {
+      grid-template-columns: 420px 1fr;
+    }
+  }
+
+  /* Cards Styling */
+  .card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color-dim);
+    border-radius: 6px;
+    padding: 1.5rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    border-color: var(--border-color);
+    box-shadow: 0 0 15px var(--gold-glow);
+  }
+
+  .card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px dashed var(--border-color-dim);
+    padding-bottom: 0.5rem;
+  }
+
+  /* Form Elements */
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+
+  input[type="text"], textarea {
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color-dim);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.9rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 4px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  input[type="text"]:focus, textarea:focus {
+    border-color: var(--border-color);
+    box-shadow: 0 0 10px var(--gold-glow);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  /* Dropzone Styling */
+  .file-dropzone {
+    border: 1px dashed var(--border-color-dim);
+    border-radius: 4px;
+    padding: 1.25rem;
+    text-align: center;
+    cursor: pointer;
+    background-color: var(--bg-color);
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+  }
+
+  .file-dropzone:hover {
+    border-color: var(--border-color);
+    background-color: rgba(215, 175, 114, 0.03);
+  }
+
+  .file-dropzone input[type="file"] {
+    display: none;
+  }
+
+  .file-dropzone-text {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  .file-dropzone-text strong {
+    color: var(--gold);
+  }
+
+  .file-dropzone.has-file {
+    border-style: solid;
+    background-color: rgba(215, 175, 114, 0.04);
+  }
+
+  .selected-file-name {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    word-break: break-all;
+  }
+
+  /* Buttons */
+  button {
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--gold);
+    background: transparent;
+    border: 1px solid var(--border-color);
+    padding: 0.6rem 1.2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  button:hover {
+    background-color: var(--border-color);
+    color: var(--bg-color);
+    box-shadow: 0 0 15px var(--gold-glow);
+  }
+
+  button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: transparent;
+    color: var(--gold);
+    box-shadow: none;
+  }
+
+  /* Statistics Cards Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .stat-card {
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color-dim);
+    border-radius: 4px;
+    padding: 1rem 0.5rem;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Response Panels */
+  .response-wrapper {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .response-content {
+    background-color: var(--bg-color);
+    border: 1px dashed var(--border-color-dim);
+    border-radius: 4px;
+    padding: 1.25rem;
+  }
+
+  .answer-text {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    line-height: 1.6;
+  }
+
+  /* Metadata Badges */
+  .meta-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px dashed var(--border-color-dim);
+    padding-bottom: 0.75rem;
+  }
+
+  .meta-badge {
+    font-size: 0.75rem;
+    border: 1px solid var(--border-color-dim);
+    padding: 0.25rem 0.6rem;
+    border-radius: 3px;
+    color: var(--text-secondary);
+  }
+
+  .meta-badge strong {
+    color: var(--gold);
+  }
+
+  /* Sources section */
+  .sources-section {
+    margin-top: 1.25rem;
+    border-top: 1px dashed var(--border-color-dim);
+    padding-top: 0.75rem;
+  }
+
+  .sources-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+
+  .sources-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .source-item {
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-primary);
+  }
+
+  .source-tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: 1px solid var(--border-color);
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+    color: var(--gold);
+  }
+
+  .source-tag-pdf {
+    border-color: #af5f5f;
+    color: #f87171;
+  }
+
+  .source-tag-obsidian {
+    border-color: #875faf;
+    color: #c084fc;
+  }
+
+  .source-tag-txt {
+    border-color: #888;
+    color: #aaa;
+  }
+
+  .source-detail {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+  }
+
+  /* Status Messages */
+  .status-message {
+    padding: 0.6rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-top: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .status-success {
+    background-color: rgba(135, 175, 135, 0.08);
+    color: #87af87;
+    border: 1px solid rgba(135, 175, 135, 0.2);
+  }
+
+  .status-error {
+    background-color: rgba(175, 95, 95, 0.08);
+    color: #af5f5f;
+    border: 1px solid rgba(175, 95, 95, 0.2);
+  }
+
+  .status-loading {
+    background-color: rgba(215, 175, 114, 0.05);
+    color: var(--gold);
+    border: 1px solid var(--border-color-dim);
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 0.8rem;
+    height: 0.8rem;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .hidden {
+    display: none !important;
+  }
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>Adaptive Multi-Model RAG Assistant</h1>
+  <header>
+    <h1>Adaptive Multi-Model RAG</h1>
+  </header>
 
-  <div class="section">
-    <h2>Upload PDF</h2>
-    <div class="row">
-      <input type="file" id="pdf-file" accept=".pdf">
-      <button id="upload-btn">Upload</button>
+  <div class="dashboard-grid">
+    <!-- Left Column: Settings and Controls -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      
+      <!-- Obsidian Vault Ingestion -->
+      <div class="card">
+        <div class="card-title">Obsidian Sync</div>
+        <div class="form-group">
+          <label class="form-label" for="vault-path-input">Vault Directory Path</label>
+          <input type="text" id="vault-path-input" placeholder="e.g. D:/Obsidian/MyVault">
+        </div>
+        <button id="sync-btn">Sync Vault</button>
+        <div id="sync-status" class="status-message hidden"></div>
+      </div>
+
+      <!-- File Ingest -->
+      <div class="card">
+        <div class="card-title">File Ingestion</div>
+        <div class="form-group">
+          <div class="file-dropzone" id="dropzone">
+            <input type="file" id="upload-file-input" accept=".pdf,.md,.markdown,.txt,.text">
+            <div class="file-dropzone-text" id="dropzone-label">
+              Drag & Drop file or <strong>browse</strong>
+            </div>
+          </div>
+          <div id="selected-file-name" class="selected-file-name hidden"></div>
+        </div>
+        <button id="upload-btn" disabled>Index File</button>
+        <div id="upload-status" class="status-message hidden"></div>
+      </div>
+
+      <!-- Stats -->
+      <div class="card">
+        <div class="card-title">Vault Statistics</div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-num" id="stat-notes">0</div>
+            <div class="stat-label">Notes</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="stat-links">0</div>
+            <div class="stat-label">Links</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="stat-chunks">0</div>
+            <div class="stat-label">Chunks</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="stat-embeddings">0</div>
+            <div class="stat-label">Vectors</div>
+          </div>
+        </div>
+      </div>
+
     </div>
-    <div id="upload-status" class="hidden"></div>
-  </div>
 
-  <hr>
+    <!-- Right Column: Query Panel -->
+    <div class="card" style="display: flex; flex-direction: column; height: fit-content;">
+      <div class="card-title">Query Console</div>
+      
+      <div class="form-group">
+        <label class="form-label" for="question-input">Enter Question</label>
+        <textarea id="question-input" placeholder="e.g. Explain my roadmap or Compare FastAPI and Docker"></textarea>
+      </div>
+      
+      <button id="ask-btn">Ask Assistant</button>
+      
+      <div id="chat-status" class="status-message hidden"></div>
 
-  <div class="section">
-    <h2>Chat</h2>
-    <div class="row">
-      <textarea id="question-input" rows="1" placeholder="Ask a question about your documents..."></textarea>
-      <button id="chat-btn">Ask</button>
-    </div>
-    <div id="chat-status" class="hidden"></div>
-    <div id="chat-result" class="hidden">
-      <div class="answer" id="answer-text"></div>
-      <div class="sources" id="sources-area" class="hidden"></div>
-      <div class="meta" id="meta-area"></div>
+      <!-- Response Pane -->
+      <div id="chat-result" class="response-wrapper hidden">
+        <div class="response-content">
+          <!-- Metadata -->
+          <div class="meta-grid">
+            <div class="meta-badge">Model: <strong id="model-badge">-</strong></div>
+            <div class="meta-badge">Complexity: <strong id="complexity-badge">-</strong></div>
+            <div class="meta-badge">Retrieval: <strong id="retrieval-time-badge">0ms</strong></div>
+            <div class="meta-badge">Generation: <strong id="generation-time-badge">0ms</strong></div>
+          </div>
+
+          <div class="answer-text" id="answer-text"></div>
+
+          <!-- Attributed Sources -->
+          <div class="sources-section" id="sources-section">
+            <div class="sources-title">Sources</div>
+            <ul class="sources-list" id="sources-list">
+              <!-- Dynamically populated -->
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
+// State handles
+const syncBtn = document.getElementById('sync-btn');
+const vaultPathInput = document.getElementById('vault-path-input');
+const syncStatus = document.getElementById('sync-status');
+
+const dropzone = document.getElementById('dropzone');
+const uploadFileInput = document.getElementById('upload-file-input');
+const dropzoneLabel = document.getElementById('dropzone-label');
+const selectedFileName = document.getElementById('selected-file-name');
 const uploadBtn = document.getElementById('upload-btn');
-const fileInput = document.getElementById('pdf-file');
 const uploadStatus = document.getElementById('upload-status');
+
+const statNotes = document.getElementById('stat-notes');
+const statLinks = document.getElementById('stat-links');
+const statChunks = document.getElementById('stat-chunks');
+const statEmbeddings = document.getElementById('stat-embeddings');
+
 const questionInput = document.getElementById('question-input');
-const chatBtn = document.getElementById('chat-btn');
+const askBtn = document.getElementById('ask-btn');
 const chatStatus = document.getElementById('chat-status');
 const chatResult = document.getElementById('chat-result');
 const answerText = document.getElementById('answer-text');
-const sourcesArea = document.getElementById('sources-area');
-const metaArea = document.getElementById('meta-area');
+const modelBadge = document.getElementById('model-badge');
+const retrievalTimeBadge = document.getElementById('retrieval-time-badge');
+const generationTimeBadge = document.getElementById('generation-time-badge');
+const complexityBadge = document.getElementById('complexity-badge');
+const sourcesList = document.getElementById('sources-list');
+
+// 1. Fetch & update statistics
+async function updateStats() {
+  try {
+    const res = await fetch('/vault/stats');
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    statNotes.textContent = data.notes;
+    statLinks.textContent = data.links;
+    statChunks.textContent = data.chunks;
+    statEmbeddings.textContent = data.embeddings;
+  } catch (err) {
+    console.error('Failed to load vault statistics.');
+  }
+}
+
+// Initial load
+updateStats();
+
+// 2. Sync Vault Event
+syncBtn.addEventListener('click', async () => {
+  const vaultPath = vaultPathInput.value.trim();
+  if (!vaultPath) {
+    showStatus(syncStatus, 'error', 'Error: Vault path is required.');
+    return;
+  }
+
+  syncBtn.disabled = true;
+  showStatus(syncStatus, 'loading', 'Syncing Vault...');
+
+  try {
+    const res = await fetch('/vault/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ vault_path: vaultPath })
+    });
+    const data = await res.json();
+    
+    if (res.ok) {
+      showStatus(syncStatus, 'success', `Synced successfully. Chunks: ${data.chunks_indexed}.`);
+      updateStats();
+    } else {
+      showStatus(syncStatus, 'error', data.detail || 'Sync failed.');
+    }
+  } catch (err) {
+    showStatus(syncStatus, 'error', 'Communication error.');
+  } finally {
+    syncBtn.disabled = false;
+  }
+});
+
+// 3. Dropzone & File Ingestion Upload Events
+dropzone.addEventListener('click', () => uploadFileInput.click());
+
+dropzone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropzone.style.borderColor = 'var(--border-color)';
+  dropzone.style.backgroundColor = 'rgba(215, 175, 114, 0.08)';
+});
+
+dropzone.addEventListener('dragleave', () => {
+  dropzone.style.borderColor = 'var(--border-color-dim)';
+  dropzone.style.backgroundColor = 'var(--bg-color)';
+});
+
+dropzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropzone.style.borderColor = 'var(--border-color-dim)';
+  dropzone.style.backgroundColor = 'var(--bg-color)';
+  
+  if (e.dataTransfer.files.length) {
+    uploadFileInput.files = e.dataTransfer.files;
+    handleFileSelected();
+  }
+});
+
+uploadFileInput.addEventListener('change', handleFileSelected);
+
+function handleFileSelected() {
+  const file = uploadFileInput.files[0];
+  if (file) {
+    dropzone.classList.add('has-file');
+    dropzoneLabel.innerHTML = `Selected: <strong style="color: var(--gold);">${file.name}</strong>`;
+    selectedFileName.textContent = `Selected file: ${file.name}`;
+    selectedFileName.classList.remove('hidden');
+    uploadBtn.disabled = false;
+  } else {
+    dropzone.classList.remove('has-file');
+    dropzoneLabel.innerHTML = `Drag & Drop file or <strong>browse</strong>`;
+    selectedFileName.textContent = '';
+    selectedFileName.classList.add('hidden');
+    uploadBtn.disabled = true;
+  }
+}
 
 uploadBtn.addEventListener('click', async () => {
-  const file = fileInput.files[0];
+  const file = uploadFileInput.files[0];
   if (!file) return;
+
   uploadBtn.disabled = true;
-  uploadStatus.className = 'msg';
-  uploadStatus.innerHTML = 'Uploading<span class="spinner"></span>';
-  uploadStatus.classList.remove('hidden');
-  const form = new FormData();
-  form.append('file', file);
+  showStatus(uploadStatus, 'loading', 'Indexing File...');
+
+  const formData = new FormData();
+  formData.append('file', file);
+
   try {
-    const res = await fetch('/upload', { method: 'POST', body: form });
+    const res = await fetch('/upload', { method: 'POST', body: formData });
     const data = await res.json();
-    uploadStatus.className = 'msg success';
-    uploadStatus.textContent = `${data.chunks_indexed} chunks indexed`;
-  } catch {
-    uploadStatus.className = 'msg error';
-    uploadStatus.textContent = 'Upload failed';
+    
+    if (res.ok) {
+      showStatus(uploadStatus, 'success', `Successfully indexed. Chunks: ${data.chunks_indexed}.`);
+      updateStats();
+      // Keep the filename visible after upload, but clear the native file input.
+      if (file) {
+        dropzone.classList.add('has-file');
+        dropzoneLabel.innerHTML = `Uploaded: <strong style="color: var(--gold);">${file.name}</strong>`;
+        selectedFileName.textContent = `Uploaded file: ${file.name}`;
+        selectedFileName.classList.remove('hidden');
+      }
+      uploadFileInput.value = '';
+      uploadBtn.disabled = true;
+    } else {
+      showStatus(uploadStatus, 'error', data.detail || 'Upload failed.');
+    }
+  } catch (err) {
+    showStatus(uploadStatus, 'error', 'Communication error.');
   } finally {
     uploadBtn.disabled = false;
   }
 });
 
-chatBtn.addEventListener('click', async () => {
+// 4. Chat Query API Event
+askBtn.addEventListener('click', async () => {
   const question = questionInput.value.trim();
   if (!question) return;
-  chatBtn.disabled = true;
+
+  askBtn.disabled = true;
   chatResult.classList.add('hidden');
-  chatStatus.className = 'msg';
-  chatStatus.innerHTML = 'Thinking<span class="spinner"></span>';
-  chatStatus.classList.remove('hidden');
+  showStatus(chatStatus, 'loading', 'Generating Answer...');
+
   try {
     const res = await fetch('/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question })
     });
+    
     const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Request failed.');
+
+    // Populate Response
     answerText.textContent = data.answer;
+    modelBadge.textContent = data.model;
+    retrievalTimeBadge.textContent = `${data.metrics.retrieval_ms}ms`;
+    generationTimeBadge.textContent = `${data.metrics.generation_ms}ms`;
+    
+    // Set complexity badge
+    const modelLower = data.model.toLowerCase();
+    const isComplex = modelLower.includes('30b');
+    complexityBadge.textContent = isComplex ? 'COMPLEX' : 'SIMPLE';
+
+    // Populate Attributed Sources
+    sourcesList.innerHTML = '';
     if (data.sources && data.sources.length) {
-      sourcesArea.classList.remove('hidden');
-      sourcesArea.innerHTML = '<strong>Sources</strong><ul>' +
-        data.sources.map(s => `<li>p. ${s.page}</li>`).join('') + '</ul>';
+      document.getElementById('sources-section').classList.remove('hidden');
+      data.sources.forEach(src => {
+        const li = document.createElement('li');
+        li.className = 'source-item';
+        
+        let typeBadge = 'txt';
+        let detailLabel = '';
+        
+        if (src.source_type === 'obsidian') {
+          typeBadge = 'obsidian';
+          detailLabel = src.vault_path ? `(${src.vault_path})` : '';
+        } else if (src.source_type === 'pdf') {
+          typeBadge = 'pdf';
+          detailLabel = src.page ? `(page ${src.page})` : '';
+        }
+
+        li.innerHTML = `
+          <span class="source-tag source-tag-${typeBadge}">${typeBadge}</span>
+          <span>${src.file_name}</span>
+          <span class="source-detail">${detailLabel}</span>
+        `;
+        sourcesList.appendChild(li);
+      });
     } else {
-      sourcesArea.classList.add('hidden');
+      document.getElementById('sources-section').classList.add('hidden');
     }
-    metaArea.innerHTML =
-      `<span>model: ${data.model}</span>` +
-      `<span>retrieval: ${data.metrics.retrieval_ms}ms</span>` +
-      `<span>generation: ${data.metrics.generation_ms}ms</span>`;
+
     chatResult.classList.remove('hidden');
     chatStatus.classList.add('hidden');
-  } catch {
-    chatStatus.className = 'msg error';
-    chatStatus.textContent = 'Request failed';
+  } catch (err) {
+    showStatus(chatStatus, 'error', err.message || 'Communication error.');
   } finally {
-    chatBtn.disabled = false;
+    askBtn.disabled = false;
   }
 });
 
+// Key Event
 questionInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); chatBtn.click(); }
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    askBtn.click();
+  }
 });
+
+// Helper: Show status message
+function showStatus(element, type, message) {
+  element.className = `status-message status-${type}`;
+  if (type === 'loading') {
+    element.innerHTML = `<span class="spinner"></span> ${message}`;
+  } else {
+    element.textContent = message;
+  }
+  element.classList.remove('hidden');
+}
 </script>
 </body>
 </html>

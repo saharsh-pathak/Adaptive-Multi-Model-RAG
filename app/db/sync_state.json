@@ -1,0 +1,96 @@
+{
+  "electronics.md": {
+    "last_modified": 1782212995.28282,
+    "chunk_ids": [
+      "obsidian_f9ef3ad1-318d-4b1a-8ac5-683cbe9b5f45",
+      "obsidian_c19eb02f-2e93-418e-a62a-2e63a3825111",
+      "obsidian_291fb2ec-72b9-4c22-8eb4-345978f87def",
+      "obsidian_cdb410a8-95b3-4a7a-b7bd-394305e96972",
+      "obsidian_6ad11f80-f750-4e1a-a0ee-9c23ab09b4d0",
+      "obsidian_f6121bdb-e351-41b8-86f6-731d6bf9f4d0",
+      "obsidian_5cf95f3e-a445-4796-87e0-19c9418a26b8",
+      "obsidian_a2f53cec-a60a-49b2-b7cb-8d87c8515c90",
+      "obsidian_451e4bce-4069-460d-81cf-5faa685c932a",
+      "obsidian_b7c28bb1-674a-43fd-831b-fa9aef5dfc3b",
+      "obsidian_5e013a99-ff85-4b55-81a5-f9c4be281a24",
+      "obsidian_40fd9fcb-73d4-4b28-8ce5-8b643e72074f",
+      "obsidian_d5c276d1-b367-4d5f-b738-8ac280007594"
+    ]
+  },
+  "fastapi.md": {
+    "last_modified": 1782213043.6452012,
+    "chunk_ids": [
+      "obsidian_5a1c1297-9339-4b54-b677-31692e6c1e9e",
+      "obsidian_0cf601d9-fcbd-42ab-95a5-64454264e50f",
+      "obsidian_fd2bb7e2-4190-4cfe-99f5-724ec80dd1e6",
+      "obsidian_a351dd8d-5758-4897-876f-41c8ea4c866c",
+      "obsidian_cb0d821c-daea-4924-a7e9-5cde9b9e48cc",
+      "obsidian_90daa0ba-179b-41e6-9c86-0783b7624522",
+      "obsidian_610c6e5f-a4e4-4935-839b-5d2dda69f89b",
+      "obsidian_6c8556a0-a6e6-42f8-8ef4-8733942971be",
+      "obsidian_45f3a495-d7dd-46d8-822a-3bee05be85ce",
+      "obsidian_df983bdf-def6-48d4-9080-33f2303073bc",
+      "obsidian_338142db-e9aa-423e-8a63-d62a793ee388",
+      "obsidian_0ec06e6e-051b-41ba-8491-f10c13aa3731",
+      "obsidian_c3d84538-0f97-4e34-9474-bd7e0f2086e0"
+    ]
+  },
+  "financial-structure-education-institutes.md": {
+    "last_modified": 1782213094.1806328,
+    "chunk_ids": [
+      "obsidian_ff591f68-012b-4dee-a526-2c44ff191b5e",
+      "obsidian_94bc54c0-080c-4632-a5c9-c2d72fcfcfc3",
+      "obsidian_c273bc7a-c663-49e4-b70c-ab2800f4a29b",
+      "obsidian_d1339b26-9362-48d8-b780-dbacc70369b3",
+      "obsidian_b2abf85f-9179-4996-9204-67e63b00d7e0",
+      "obsidian_07fe713d-0c75-4f2b-90aa-4589871ab4b0",
+      "obsidian_b5f85591-a09e-4152-a728-cd511ff0799c",
+      "obsidian_1e088b16-a06e-4551-9c35-5189ce5825c8",
+      "obsidian_ca63af45-7c09-4775-a984-c1058957ca9e",
+      "obsidian_045c1aa3-e795-46fe-9713-46b349e3fc00",
+      "obsidian_6e7cdf36-c2ce-4951-8076-37c5b192c98f",
+      "obsidian_24d414d0-5ffc-479d-acf2-0aef2f3af9c4",
+      "obsidian_65d461af-9b19-4828-9b5e-4e3b93a75be5",
+      "obsidian_c4377045-fdba-4860-99d2-2b274f53cb74"
+    ]
+  },
+  "mcp.md": {
+    "last_modified": 1782212946.4268074,
+    "chunk_ids": [
+      "obsidian_40d7524e-332f-42b1-864b-522838eef72f",
+      "obsidian_b190c98f-5527-445c-9700-73e79d3f7403",
+      "obsidian_265bc0c8-1357-49ec-b494-97ba74e4198f",
+      "obsidian_7f193f95-ec38-494d-b578-130f9a013736",
+      "obsidian_5b723897-bd4f-4bce-88bb-dfe942b69347",
+      "obsidian_f5961dff-e221-4f49-a28b-e2e788edda68",
+      "obsidian_8348c328-f193-4277-a572-62f07c35be37",
+      "obsidian_b75eef0c-716b-46ef-b9e3-8fc09d96ed71",
+      "obsidian_74ece6de-9c96-4ed2-a191-8abb277463f4",
+      "obsidian_44c27213-300c-47c7-8a23-74d5cb3b1278",
+      "obsidian_2162a942-428f-4b6a-a966-e3369a446d88",
+      "obsidian_ba7a994f-6bd2-42ae-a331-e5f565a3cd95",
+      "obsidian_52959bf8-759f-44dc-a826-eb21034f5541",
+      "obsidian_99788bed-c84a-4845-85ca-a2297505c35f"
+    ]
+  },
+  "rag.md": {
+    "last_modified": 1782212884.9310477,
+    "chunk_ids": [
+      "obsidian_7ad8275d-f486-430d-a2a5-353a9ce94033",
+      "obsidian_026f3164-748f-4e14-b2a0-892a0867bba8",
+      "obsidian_c6430753-6151-4ec4-85b0-30b601fcfece",
+      "obsidian_f9c3e6b4-0573-4653-b7d4-8eac01c48b1b",
+      "obsidian_dc1d19a8-3ab3-4d58-896f-9e6bbd53214f",
+      "obsidian_91285ac9-a797-4aca-bbc5-274882f3e0df",
+      "obsidian_a096ce7e-cd63-4e80-ac98-c8115f0ec1cd",
+      "obsidian_27a0f28f-8c9c-4d41-b296-066855a1335d",
+      "obsidian_f60ce854-1c42-474a-8760-7d78dd90eb85",
+      "obsidian_e5429fcd-8e96-4ce0-bbf4-1daf6dc39252",
+      "obsidian_687c8277-9ed9-4d22-8620-c7ecd276dc25",
+      "obsidian_4aecb88f-db4c-43ac-866f-2f8a8221927f",
+      "obsidian_fb73d785-50d4-4c93-98c6-bad7204f741e",
+      "obsidian_944d4c32-c6e0-415b-940f-ae7e682491dc",
+      "obsidian_a541b81f-8741-4263-858e-e2efbb7e5cab"
+    ]
+  }
+}

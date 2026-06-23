@@ -6,7 +6,10 @@ class ChatRequest(BaseModel):
 
 
 class Source(BaseModel):
+    source_type: str
+    file_name: str
     page: int | None = None
+    vault_path: str | None = None
 
 
 class Metrics(BaseModel):
