@@ -1,4 +1,7 @@
 # Adaptive Multi-Model RAG Assistant
+<img width="959" height="539" alt="Screenshot 2026-06-23 173417" src="https://github.com/user-attachments/assets/2e042257-04cf-4e61-b778-55c5decdb958" />
+<img width="959" height="539" alt="Screenshot 2026-06-23 174045" src="https://github.com/user-attachments/assets/dd0b043f-0f17-4070-96d9-057efb1158ea" />
+<img width="959" height="539" alt="Screenshot 2026-06-23 174613" src="https://github.com/user-attachments/assets/91ad24ef-78c8-48f6-8a26-083535414898" />
 
 Adaptive Multi-Model RAG Assistant is a fully local retrieval-augmented generation system built with FastAPI, ChromaDB, Ollama, and Obsidian vault integration.
 
